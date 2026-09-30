@@ -1,94 +1,238 @@
-# brace-expansion
+# BSON parser
 
-[Brace expansion](https://www.gnu.org/software/bash/manual/html_node/Brace-Expansion.html),
-as known from sh/bash, in JavaScript.
+BSON is short for "Binary JSON," and is the binary-encoded serialization of JSON-like documents.
+You can learn more about it in [the specification](http://bsonspec.org).
 
-[![CI](https://github.com/juliangruber/brace-expansion/actions/workflows/ci.yml/badge.svg)](https://github.com/juliangruber/brace-expansion/actions/workflows/ci.yml)
-[![downloads](https://img.shields.io/npm/dm/brace-expansion.svg)](https://www.npmjs.org/package/brace-expansion)
+### Table of Contents
+- [Usage](#usage)
+- [Bugs/Feature Requests](#bugs--feature-requests)
+- [Installation](#installation)
+- [Documentation](#documentation)
+- [FAQ](#faq)
 
-## Example
+## Bugs / Feature Requests
 
-```js
-import { expand } from 'brace-expansion'
+Think you've found a bug? Want to see a new feature in `bson`? Please open a case in our issue management tool, JIRA:
 
-expand('file-{a,b,c}.jpg')
-// => ['file-a.jpg', 'file-b.jpg', 'file-c.jpg']
+1. Create an account and login: [jira.mongodb.org](https://jira.mongodb.org)
+2. Navigate to the NODE project: [jira.mongodb.org/browse/NODE](https://jira.mongodb.org/browse/NODE)
+3. Click **Create Issue** - Please provide as much information as possible about the issue and how to reproduce it.
 
-expand('-v{,,}')
-// => ['-v', '-v', '-v']
+Bug reports in JIRA for all driver projects (i.e. NODE, PYTHON, CSHARP, JAVA) and the Core Server (i.e. SERVER) project are **public**.
 
-expand('file{0..2}.jpg')
-// => ['file0.jpg', 'file1.jpg', 'file2.jpg']
+## Usage
 
-expand('file-{a..c}.jpg')
-// => ['file-a.jpg', 'file-b.jpg', 'file-c.jpg']
+To build a new version perform the following operations:
 
-expand('file{2..0}.jpg')
-// => ['file2.jpg', 'file1.jpg', 'file0.jpg']
-
-expand('file{0..4..2}.jpg')
-// => ['file0.jpg', 'file2.jpg', 'file4.jpg']
-
-expand('file-{a..e..2}.jpg')
-// => ['file-a.jpg', 'file-c.jpg', 'file-e.jpg']
-
-expand('file{00..10..5}.jpg')
-// => ['file00.jpg', 'file05.jpg', 'file10.jpg']
-
-expand('{{A..C},{a..c}}')
-// => ['A', 'B', 'C', 'a', 'b', 'c']
-
-expand('ppp{,config,oe{,conf}}')
-// => ['ppp', 'pppconfig', 'pppoe', 'pppoeconf']
+```
+npm install
+npm run build
 ```
 
-## API
+### Node.js or Bundling Usage
+
+When using a bundler or Node.js you can import bson using the package name:
 
 ```js
-import { expand } from 'brace-expansion'
+import { BSON, EJSON, ObjectId } from 'bson';
+// or:
+// const { BSON, EJSON, ObjectId } = require('bson');
+
+const bytes = BSON.serialize({ _id: new ObjectId() });
+console.log(bytes);
+const doc = BSON.deserialize(bytes);
+console.log(EJSON.stringify(doc));
+// {"_id":{"$oid":"..."}}
 ```
 
-### const expanded = expand(str, [options])
+### Browser Usage
 
-Return an array of all possible and valid expansions of `str`. If
-none are found, `[str]` is returned.
+If you are working directly in the browser without a bundler please use the `.mjs` bundle like so:
 
-The `options` object can provide a `max` value to cap the number
-of expansions allowed. This is limited to `100_000` by default,
-to prevent DoS attacks.
+```html
+<script type="module">
+  import { BSON, EJSON, ObjectId } from './lib/bson.mjs';
 
+  const bytes = BSON.serialize({ _id: new ObjectId() });
+  console.log(bytes);
+  const doc = BSON.deserialize(bytes);
+  console.log(EJSON.stringify(doc));
+  // {"_id":{"$oid":"..."}}
+</script>
+```
+
+## Installation
+
+```sh
+npm install bson
+```
+
+## Documentation
+
+### BSON 
+
+[API documentation](https://mongodb.github.io/node-mongodb-native/Next/modules/BSON.html)
+
+<a name="EJSON"></a>
+
+### EJSON
+
+* [EJSON](#EJSON)
+
+    * [.parse(text, [options])](#EJSON.parse)
+
+    * [.stringify(value, [replacer], [space], [options])](#EJSON.stringify)
+
+    * [.serialize(bson, [options])](#EJSON.serialize)
+
+    * [.deserialize(ejson, [options])](#EJSON.deserialize)
+
+
+<a name="EJSON.parse"></a>
+
+#### *EJSON*.parse(text, [options])
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| text | <code>string</code> |  |  |
+| [options] | <code>object</code> |  | Optional settings |
+| [options.relaxed] | <code>boolean</code> | <code>true</code> | Attempt to return native JS types where possible, rather than BSON types (if true) |
+
+Parse an Extended JSON string, constructing the JavaScript value or object described by that
+string.
+
+**Example**
 ```js
-const expansions = expand('{1..100}'.repeat(5), {
-  max: 100,
-})
-// expansions.length will be 100, not 100^5
+const { EJSON } = require('bson');
+const text = '{ "int32": { "$numberInt": "10" } }';
+
+// prints { int32: { [String: '10'] _bsontype: 'Int32', value: '10' } }
+console.log(EJSON.parse(text, { relaxed: false }));
+
+// prints { int32: 10 }
+console.log(EJSON.parse(text));
 ```
+<a name="EJSON.stringify"></a>
 
-Valid expansions are:
+#### *EJSON*.stringify(value, [replacer], [space], [options])
 
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| value | <code>object</code> |  | The value to convert to extended JSON |
+| [replacer] | <code>function</code> \| <code>array</code> |  | A function that alters the behavior of the stringification process, or an array of String and Number objects that serve as a whitelist for selecting/filtering the properties of the value object to be included in the JSON string. If this value is null or not provided, all properties of the object are included in the resulting JSON string |
+| [space] | <code>string</code> \| <code>number</code> |  | A String or Number object that's used to insert white space into the output JSON string for readability purposes. |
+| [options] | <code>object</code> |  | Optional settings |
+| [options.relaxed] | <code>boolean</code> | <code>true</code> | Enabled Extended JSON's `relaxed` mode |
+| [options.legacy] | <code>boolean</code> | <code>true</code> | Output in Extended JSON v1 |
+
+Converts a BSON document to an Extended JSON string, optionally replacing values if a replacer
+function is specified or optionally including only the specified properties if a replacer array
+is specified.
+
+**Example**
 ```js
-;/^(.*,)+(.+)?$/
-// {a,b,...}
+const { EJSON } = require('bson');
+const Int32 = require('mongodb').Int32;
+const doc = { int32: new Int32(10) };
+
+// prints '{"int32":{"$numberInt":"10"}}'
+console.log(EJSON.stringify(doc, { relaxed: false }));
+
+// prints '{"int32":10}'
+console.log(EJSON.stringify(doc));
+```
+<a name="EJSON.serialize"></a>
+
+#### *EJSON*.serialize(bson, [options])
+
+| Param | Type | Description |
+| --- | --- | --- |
+| bson | <code>object</code> | The object to serialize |
+| [options] | <code>object</code> | Optional settings passed to the `stringify` function |
+
+Serializes an object to an Extended JSON string, and reparse it as a JavaScript object.
+
+<a name="EJSON.deserialize"></a>
+
+#### *EJSON*.deserialize(ejson, [options])
+
+| Param | Type | Description |
+| --- | --- | --- |
+| ejson | <code>object</code> | The Extended JSON object to deserialize |
+| [options] | <code>object</code> | Optional settings passed to the parse method |
+
+Deserializes an Extended JSON object into a plain JavaScript object with native/BSON types
+
+## Error Handling
+
+It is our recommendation to use `BSONError.isBSONError()` checks on errors and to avoid relying on parsing `error.message` and `error.name` strings in your code. We guarantee `BSONError.isBSONError()` checks will pass according to semver guidelines, but errors may be sub-classed or their messages may change at any time, even patch releases, as we see fit to increase the helpfulness of the errors.
+
+Any new errors we add to the driver will directly extend an existing error class and no existing error will be moved to a different parent class outside of a major release.
+This means `BSONError.isBSONError()` will always be able to accurately capture the errors that our BSON library throws.
+
+Hypothetical example: A collection in our Db has an issue with UTF-8 data:
+
+```ts
+let documentCount = 0;
+const cursor = collection.find({}, { utf8Validation: true });
+try {
+  for await (const doc of cursor) documentCount += 1;
+} catch (error) {
+  if (BSONError.isBSONError(error)) {
+    console.log(`Found the troublemaker UTF-8!: ${documentCount} ${error.message}`);
+    return documentCount;
+  }
+  throw error;
+}
 ```
 
-A comma separated list of options, like `{a,b}` or `{a,{b,c}}` or `{,a,}`.
+## React Native
 
-```js
-;/^-?\d+\.\.-?\d+(\.\.-?\d+)?$/
-// {x..y[..incr]}
+BSON vendors the required polyfills for `TextEncoder`, `TextDecoder`, `atob`, `btoa` imported from React Native and therefore doesn't expect users to polyfill these. One additional polyfill, `crypto.getRandomValues` is recommended and can be installed with the following command:
+
+```sh
+npm install --save react-native-get-random-values
 ```
 
-A numeric sequence from `x` to `y` inclusive, with optional increment.
-If `x` or `y` start with a leading `0`, all the numbers will be padded
-to have equal length. Negative numbers and backwards iteration work too.
+The following snippet should be placed at the top of the entrypoint (by default this is the root `index.js` file) for React Native projects using the BSON library.  These lines must be placed for any code that imports `BSON`.
 
-```js
-;/^-?\d+\.\.-?\d+(\.\.-?\d+)?$/
-// {x..y[..incr]}
+```typescript
+// Required Polyfills For ReactNative
+import 'react-native-get-random-values';
 ```
 
-An alphabetic sequence from `x` to `y` inclusive, with optional increment.
-`x` and `y` must be exactly one character, and if given, `incr` must be a
-number.
+Finally, import the `BSON` library like so:
 
-For compatibility reasons, the string `${` is not eligible for brace expansion.
+```typescript
+import { BSON, EJSON } from 'bson';
+```
+
+This will cause React Native to import the `node_modules/bson/lib/bson.rn.cjs` bundle (see the `"react-native"` setting we have in the `"exports"` section of our [package.json](./package.json).)
+
+### Technical Note about React Native module import
+
+The `"exports"` definition in our `package.json` will result in BSON's CommonJS bundle being imported in a React Native project instead of the ES module bundle.  Importing the CommonJS bundle is necessary because BSON's ES module bundle of BSON uses top-level await, which is not supported syntax in [React Native's runtime hermes](https://hermesengine.dev/).
+
+## FAQ
+
+#### Why does `undefined` get converted to `null`?
+
+The `undefined` BSON type has been [deprecated for many years](http://bsonspec.org/spec.html), so this library has dropped support for it. Use the `ignoreUndefined` option (for example, from the [driver](http://mongodb.github.io/node-mongodb-native/2.2/api/MongoClient.html#connect) ) to instead remove `undefined` keys.
+
+#### How do I add custom serialization logic?
+
+This library looks for `toBSON()` functions on every path, and calls the `toBSON()` function to get the value to serialize.
+
+```javascript
+const BSON = require('bson');
+
+class CustomSerialize {
+  toBSON() {
+    return 42;
+  }
+}
+
+const obj = { answer: new CustomSerialize() };
+// "{ answer: 42 }"
+console.log(BSON.deserialize(BSON.serialize(obj)));
+```
