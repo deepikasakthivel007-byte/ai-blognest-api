@@ -1,8 +1,8 @@
-'use strict';
-
-var hasSymbols = require('has-symbols');
-
-/** @type {import('.')} */
-module.exports = function hasToStringTag() {
-	return hasSymbols() && typeof Symbol.toStringTag === 'symbol';
+module.exports = {
+  decode: require('./decode'),
+  verify: require('./verify'),
+  sign: require('./sign'),
+  JsonWebTokenError: require('./lib/JsonWebTokenError'),
+  NotBeforeError: require('./lib/NotBeforeError'),
+  TokenExpiredError: require('./lib/TokenExpiredError'),
 };

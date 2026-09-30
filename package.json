@@ -1,88 +1,70 @@
 {
-  "name": "ip-address",
-  "description": "A library for parsing IPv4 and IPv6 IP addresses in node and the browser.",
-  "keywords": [
-    "ip",
-    "ipv4",
-    "ipv6",
-    "address",
-    "cidr",
-    "subnet",
-    "netmask",
-    "validate",
-    "validation",
-    "parse",
-    "arpa",
-    "bigint",
-    "browser"
-  ],
-  "version": "10.2.0",
-  "author": "Beau Gunderson <beau@beaugunderson.com> (https://beaugunderson.com/)",
-  "license": "MIT",
-  "main": "dist/ip-address.js",
-  "types": "dist/ip-address.d.ts",
-  "scripts": {
-    "docs": "tsx scripts/build-readme.ts",
-    "build": "rm -rf dist; mkdir dist; tsc",
-    "prepack": "npm run docs && npm run build",
-    "test-ci": "c8 --experimental-monocart mocha",
-    "test": "mocha",
-    "watch": "mocha --watch"
-  },
-  "c8": {
-    "include": [
-      "src/**/*.ts"
-    ],
+  "name": "jsonwebtoken",
+  "version": "9.0.3",
+  "description": "JSON Web Token implementation (symmetric and asymmetric)",
+  "main": "index.js",
+  "nyc": {
+    "check-coverage": true,
+    "lines": 95,
+    "statements": 95,
+    "functions": 100,
+    "branches": 95,
     "exclude": [
-      "**/*.d.ts",
-      "src/ip-address.ts",
-      "src/v4/constants.ts",
-      "src/v6/constants.ts"
+      "./test/**"
     ],
     "reporter": [
-      "html",
+      "json",
       "lcov",
-      "text"
+      "text-summary"
     ]
   },
-  "engines": {
-    "node": ">= 12"
+  "scripts": {
+    "lint": "eslint .",
+    "coverage": "nyc mocha --use_strict",
+    "test": "mocha"
   },
-  "sideEffects": false,
-  "files": [
-    "dist"
-  ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/beaugunderson/ip-address.git"
+    "url": "https://github.com/auth0/node-jsonwebtoken"
   },
-  "overrides": {
-    "diff": "^8.0.3",
-    "serialize-javascript": "^7.0.5",
-    "@eslint/plugin-kit": "^0.7.1"
+  "keywords": [
+    "jwt"
+  ],
+  "author": "auth0",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/auth0/node-jsonwebtoken/issues"
+  },
+  "dependencies": {
+    "jws": "^4.0.1",
+    "lodash.includes": "^4.3.0",
+    "lodash.isboolean": "^3.0.3",
+    "lodash.isinteger": "^4.0.4",
+    "lodash.isnumber": "^3.0.3",
+    "lodash.isplainobject": "^4.0.6",
+    "lodash.isstring": "^4.0.1",
+    "lodash.once": "^4.0.0",
+    "ms": "^2.1.1",
+    "semver": "^7.5.4"
   },
   "devDependencies": {
-    "@types/chai": "^5.2.3",
-    "@types/mocha": "^10.0.10",
-    "@typescript-eslint/eslint-plugin": "^8.59.1",
-    "@typescript-eslint/parser": "^8.59.1",
-    "c8": "^11.0.0",
-    "chai": "^6.2.2",
-    "eslint": "^8.57.1",
-    "eslint_d": "^14.0.4",
-    "eslint-config-airbnb": "^19.0.4",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-filenames": "^1.3.2",
-    "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-jsx-a11y": "^6.10.2",
-    "eslint-plugin-prettier": "^5.5.5",
-    "eslint-plugin-sort-imports-es6-autofix": "^0.6.0",
-    "mocha": "^11.7.5",
-    "monocart-coverage-reports": "^2.12.11",
-    "prettier": "^3.8.3",
-    "source-map-support": "^0.5.21",
-    "tsx": "^4.21.0",
-    "typedoc": "^0.28.19",
-    "typescript": "<5.6.0"
-  }
+    "atob": "^2.1.2",
+    "chai": "^4.1.2",
+    "conventional-changelog": "~1.1.0",
+    "eslint": "^4.19.1",
+    "mocha": "^5.2.0",
+    "nsp": "^2.6.2",
+    "nyc": "^11.9.0",
+    "sinon": "^6.0.0"
+  },
+  "engines": {
+    "npm": ">=6",
+    "node": ">=12"
+  },
+  "files": [
+    "lib",
+    "decode.js",
+    "sign.js",
+    "verify.js"
+  ]
 }
